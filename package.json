@@ -1,0 +1,34 @@
+{
+  "name": "addcomment",
+  "version": "1.0.0",
+  "description": "Add comment to pr, issue etc",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/caneesh/addcomment.git"
+  },
+  "keywords": [
+    "comment",
+    "graphql",
+    "subject",
+    "id",
+    "mutation",
+    "process.env",
+    "GITHUB_REF"
+  ],
+  "author": "Me",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/caneesh/addcomment/issues"
+  },
+  "homepage": "https://github.com/caneesh/addcomment#readme",
+  "dependencies": {
+    "@actions/core": "^1.2.0",
+    "@octokit/graphql": "^4.3.0",
+    "typescript": "^3.6.4"
+  }
+}
