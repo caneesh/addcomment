@@ -5,7 +5,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: caneesh/addcomment/@master
+      - uses: caneesh/addcomment@master
         with:
           pull_number: '3'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
