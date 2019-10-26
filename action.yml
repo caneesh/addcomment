@@ -1,0 +1,13 @@
+name: 'Add Comment'
+description: '👍 Github action to add comments'
+author: ''
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'thumbs-up'
+  color: 'gray-dark'
+inputs:
+  repo-token:  # GitHub Auth Token
+  body:
+    description: 'The contents of the review body comment. Required when event is COMMENT or REQUEST_CHANGES.'
