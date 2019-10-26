@@ -1,12 +1,6 @@
 name: Add Comment flow
 
-on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - addComment/**
-
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
