@@ -81,7 +81,7 @@ var AddComment = /** @class */ (function () {
                         console.log("repo-token " + this.token.length);
                         graphQlResponse = graphql_1.graphql(this.addPullRequestCommentMutation(), {
                             headers: {
-                                authorization: "token 0e325384c4990d888a3a535eb1ba76611cfd5cc3",
+                                authorization: "token 1e3754d26a24ee115c50f37bd9267abde193ba0f",
                             },
                             subjectId: data.repository.pullRequest.id,
                             body: comment,
@@ -104,7 +104,7 @@ var AddComment = /** @class */ (function () {
                         console.log("repo-token " + this.token);
                         return [4 /*yield*/, graphql_1.graphql(findPullRequestIdQuery, {
                                 headers: {
-                                    authorization: "token 0e325384c4990d888a3a535eb1ba76611cfd5cc3",
+                                    authorization: "token 1e3754d26a24ee115c50f37bd9267abde193ba0f",
                                 },
                                 owner: nameAndRepo[0],
                                 repo: nameAndRepo[1],
