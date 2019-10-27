@@ -35,18 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-    result["default"] = mod;
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var core = __importStar(require("@actions/core"));
 var graphql_1 = require("@octokit/graphql");
 var AddComment = /** @class */ (function () {
     function AddComment() {
+        this.token = '0e325384c4990d888a3a535eb1ba76611cfd5cc3';
     }
     AddComment.prototype.getOwnerAndRepo = function () {
         console.log("process.env.GITHUB_REPOSITORY " + process.env.GITHUB_REPOSITORY);
@@ -63,8 +56,10 @@ var AddComment = /** @class */ (function () {
     };
     AddComment.prototype.getPullNumber = function () {
         console.log("process.env.GITHUB_REF " + process.env.GITHUB_REF);
+        return 1;
         if (process.env.GITHUB_REF) {
-            return parseInt(process.env.GITHUB_REF.split('/')[2]);
+            return 1;
+            // return parseInt(process.env.GITHUB_REF.split('/')[2]);
         }
         else {
             throw new Error('GITHUB_REF is missing in process.env');
@@ -75,18 +70,18 @@ var AddComment = /** @class */ (function () {
     };
     AddComment.prototype.addCommentUsingSubjectId = function (pullRequestId, comment) {
         return __awaiter(this, void 0, void 0, function () {
-            var data, token, graphQlResponse;
+            var data, graphQlResponse;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         console.log("pullRequestId  ===>>>> " + pullRequestId);
                         data = JSON.parse(JSON.stringify(pullRequestId));
                         console.log("Parsed pull request id " + data);
-                        token = core.getInput('repo-token');
-                        console.log("repo-token " + token);
+                        // const token = core.getInput('repo-token');
+                        console.log("repo-token " + this.token.length);
                         graphQlResponse = graphql_1.graphql(this.addPullRequestCommentMutation(), {
                             headers: {
-                                authorization: "token " + token,
+                                authorization: "token 0e325384c4990d888a3a535eb1ba76611cfd5cc3",
                             },
                             subjectId: data.repository.pullRequest.id,
                             body: comment,
@@ -100,16 +95,16 @@ var AddComment = /** @class */ (function () {
     };
     AddComment.prototype.getSubjectId = function (findPullRequestIdQuery, nameAndRepo) {
         return __awaiter(this, void 0, void 0, function () {
-            var token, newVar;
+            var newVar;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         console.log('Inside getSubjectId');
-                        token = core.getInput('repo-token');
-                        console.log("repo-token " + token);
+                        // const token = core.getInput('repo-token');
+                        console.log("repo-token " + this.token);
                         return [4 /*yield*/, graphql_1.graphql(findPullRequestIdQuery, {
                                 headers: {
-                                    authorization: "token " + token,
+                                    authorization: "token 0e325384c4990d888a3a535eb1ba76611cfd5cc3",
                                 },
                                 owner: nameAndRepo[0],
                                 repo: nameAndRepo[1],
