@@ -8,4 +8,4 @@ jobs:
       - uses: caneesh/addcomment@master
         with:
           pull_number: '3'
-          repo-token: ${{ secrets.PRIVATE_KEY }}
+#          repo-token: ${{ secrets.PRIVATE_KEY }}

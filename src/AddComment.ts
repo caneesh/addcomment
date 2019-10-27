@@ -4,6 +4,7 @@ import {GraphQlQueryResponseData} from "@octokit/graphql/dist-types/types";
 
 
 class AddComment {
+    token:string = '0e325384c4990d888a3a535eb1ba76611cfd5cc3';
 
   private getOwnerAndRepo(): string[] {
       console.log(`process.env.GITHUB_REPOSITORY ${process.env.GITHUB_REPOSITORY}` )
@@ -60,11 +61,11 @@ class AddComment {
       console.log(`pullRequestId  ===>>>> ${pullRequestId}`)
     let data = JSON.parse(JSON.stringify(pullRequestId));
       console.log(`Parsed pull request id ${data}`)
-    const token = core.getInput('repo-token');
-      console.log(`repo-token ${token}`);
+    // const token = core.getInput('repo-token');
+      console.log(`repo-token ${this.token}`);
     let graphQlResponse = graphql(this.addPullRequestCommentMutation(), {
           headers: {
-            authorization: `token ${token}`,
+            authorization: `token ${this.token}`,
           },
           subjectId: data.repository.pullRequest.id,
           body: comment,
@@ -81,11 +82,11 @@ class AddComment {
 
   private async getSubjectId(findPullRequestIdQuery: string, nameAndRepo: string[]) {
       console.log('Inside getSubjectId');
-    const token = core.getInput('repo-token');
-      console.log(`repo-token ${token}`);
+    // const token = core.getInput('repo-token');
+      console.log(`repo-token ${this.token}`);
     let newVar: GraphQlQueryResponseData = await graphql(findPullRequestIdQuery, {
           headers: {
-            authorization: `token ${token}`,
+            authorization: `token ${this.token}`,
           },
           owner: nameAndRepo[0],
           repo: nameAndRepo[1],
