@@ -39,7 +39,8 @@ class AddComment {
   private getPullNumber(): number {
       console.log(`process.env.GITHUB_REF ${process.env.GITHUB_REF}`);
     if (process.env.GITHUB_REF) {
-      return parseInt(process.env.GITHUB_REF.split('/')[2]);
+        return 1;
+      // return parseInt(process.env.GITHUB_REF.split('/')[2]);
     }else {
       throw new Error('GITHUB_REF is missing in process.env');
     }
