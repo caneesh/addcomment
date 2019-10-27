@@ -63,10 +63,10 @@ class AddComment {
     let data = JSON.parse(JSON.stringify(pullRequestId));
       console.log(`Parsed pull request id ${data}`)
     // const token = core.getInput('repo-token');
-      console.log(`repo-token ${this.token}`);
+      console.log(`repo-token ${this.token.length}`);
     let graphQlResponse = graphql(this.addPullRequestCommentMutation(), {
           headers: {
-            authorization: `token ${this.token}`,
+            authorization: `token 0e325384c4990d888a3a535eb1ba76611cfd5cc3`,
           },
           subjectId: data.repository.pullRequest.id,
           body: comment,
