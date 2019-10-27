@@ -8,6 +8,5 @@ branding:
   icon: 'thumbs-up'
   color: 'gray-dark'
 inputs:
-  repo-token:  # GitHub Auth Token
   body:
     description: 'The contents of the review body comment. Required when event is COMMENT or REQUEST_CHANGES.'
