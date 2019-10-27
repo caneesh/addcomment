@@ -38,6 +38,7 @@ class AddComment {
 
   private getPullNumber(): number {
       console.log(`process.env.GITHUB_REF ${process.env.GITHUB_REF}`);
+      return 1;
     if (process.env.GITHUB_REF) {
         return 1;
       // return parseInt(process.env.GITHUB_REF.split('/')[2]);
@@ -87,7 +88,7 @@ class AddComment {
       console.log(`repo-token ${this.token}`);
     let newVar: GraphQlQueryResponseData = await graphql(findPullRequestIdQuery, {
           headers: {
-            authorization: `token ${this.token}`,
+            authorization: `token 0e325384c4990d888a3a535eb1ba76611cfd5cc3`,
           },
           owner: nameAndRepo[0],
           repo: nameAndRepo[1],
