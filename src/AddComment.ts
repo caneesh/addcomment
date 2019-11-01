@@ -58,9 +58,9 @@ class AddComment {
     }
 
     private async addCommentUsingSubjectId(pullRequestId: GraphQlQueryResponseData, comment: string) {
-        console.log(`pullRequestId  ===>>>> ${pullRequestId}`)
+        core.debug(`pullRequestId  ===>>>> ${pullRequestId}`);
         let data = JSON.parse(JSON.stringify(pullRequestId));
-        console.log(`Parsed pull request id ${data}`)
+        core.debug(`Parsed pull request id ${data}`);
         const token = core.getInput('repo-token');
         let graphQlResponse = graphql(this.addPullRequestCommentMutation(), {
                 headers: {
@@ -71,16 +71,16 @@ class AddComment {
 
             },
         );
-        console.log(`Adding the comment ...`);
+        core.debug('Adding the comment ...');
         return await graphQlResponse;
 
     }
 
 
     private async getSubjectId(findPullRequestIdQuery: string, nameAndRepo: string[]) {
-        console.log('Inside getSubjectId');
+        core.debug('Inside getSubjectId');
         const token = core.getInput('repo-token');
-        let newVar: GraphQlQueryResponseData = await graphql(findPullRequestIdQuery, {
+        return await graphql(findPullRequestIdQuery, {
                 headers: {
                     authorization: `token ${token}`,
                 },
@@ -89,22 +89,19 @@ class AddComment {
                 pullNumber: this.getPullNumber(),
             },
         );
-        console.log(`Exiting getSubject Id`);
-        return newVar;
-
     }
 
     async addComment(comment: string) {
-        console.log('Inside addComment');
+        core.debug('Inside Add comment');
         const nameAndRepo: string[] = this.getOwnerAndRepo();
-        const [name, repo] = nameAndRepo
-        console.log(`Name is ${name}  and repo is ${repo}`);
+        const [name, repo] = nameAndRepo;
+        core.debug(`Name is ${name}  and repo is ${repo}`);
         const findPullRequestIdQuery = this.findPullRequestQuery();
         try {
             const subjectId = await this.getSubjectId(findPullRequestIdQuery, nameAndRepo);
             return await this.addCommentUsingSubjectId(subjectId, comment);
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            core.setFailed(error.message);
         }
     }
 }
