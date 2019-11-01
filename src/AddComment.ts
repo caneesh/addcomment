@@ -7,7 +7,7 @@ class AddComment {
 
 
     getOwnerAndRepo(): string[] {
-        console.log(`process.env.GITHUB_REPOSITORY ${process.env.GITHUB_REPOSITORY}`)
+        core.debug(`process.env.GITHUB_REPOSITORY ${process.env.GITHUB_REPOSITORY}`)
         if (process.env.GITHUB_REPOSITORY) {
             return process.env.GITHUB_REPOSITORY.split('/');
 
