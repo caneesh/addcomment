@@ -26,6 +26,24 @@ libraryDependencies ++= Seq(
   "org.slf4j" % "slf4j-log4j12" % "1.7.36" % "provided"
 )
 
+// Test dependencies
+libraryDependencies ++= Seq(
+  // ScalaTest for unit testing
+  "org.scalatest" %% "scalatest" % "3.2.15" % Test,
+
+  // Spark testing utilities
+  "org.apache.spark" %% "spark-core" % "3.3.0" % Test,
+  "org.apache.spark" %% "spark-sql" % "3.3.0" % Test,
+  "org.apache.spark" %% "spark-hive" % "3.3.0" % Test,
+
+  // Mockito for mocking
+  "org.mockito" %% "mockito-scala" % "1.17.12" % Test,
+  "org.mockito" %% "mockito-scala-scalatest" % "1.17.12" % Test,
+
+  // Test email server
+  "com.icegreen" % "greenmail" % "1.6.9" % Test
+)
+
 // Assembly settings for creating fat JAR
 assembly / assemblyJarName := s"${name.value}-${version.value}.jar"
 

@@ -527,6 +527,104 @@ sbt package
 sbt assembly
 ```
 
+### Testing
+
+The project includes comprehensive test coverage with unit tests and integration tests.
+
+#### Running Tests
+
+```bash
+# Run all tests
+sbt test
+
+# Run specific test suite
+sbt "testOnly com.company.anomaly.model.MetricStatisticsSpec"
+
+# Run tests with coverage
+sbt clean coverage test coverageReport
+
+# Run tests in watch mode (re-run on file changes)
+sbt ~test
+```
+
+#### Test Structure
+
+```
+src/test/scala/
+├── com/company/anomaly/
+│   ├── model/
+│   │   ├── MetricStatisticsSpec.scala      # Statistical calculations
+│   │   └── AnomalyResultSpec.scala         # Result model & formatting
+│   ├── detector/
+│   │   ├── IQRDetectorSpec.scala           # IQR detection logic
+│   │   └── ZScoreDetectorSpec.scala        # Z-Score detection logic
+│   ├── config/
+│   │   └── AppConfigSpec.scala             # Configuration validation
+│   └── IntegrationSpec.scala               # End-to-end workflows
+```
+
+#### Test Coverage
+
+- **Model Tests** (180+ test cases):
+  - Statistical calculations (mean, std dev, percentiles)
+  - Edge cases (empty data, single values, zero variance)
+  - Partition value extraction
+  - HTML formatting for emails
+
+- **Detector Tests** (120+ test cases):
+  - Anomaly detection logic for both methods
+  - Score calculation and normalization
+  - Threshold validation
+  - Real-world scenarios (spikes, drops, variations)
+
+- **Config Tests** (60+ test cases):
+  - Configuration validation
+  - Invalid parameter handling
+  - Default value verification
+
+- **Integration Tests** (40+ test cases):
+  - Complete detection workflows
+  - Multi-method comparison
+  - Day-of-week pattern analysis
+  - High/low variance data handling
+
+#### Test Examples
+
+```bash
+# Example test output
+[info] MetricStatisticsSpec:
+[info] - should calculate correct statistics for a simple dataset
+[info] - should calculate correct standard deviation
+[info] - should handle single value correctly
+[info] - should calculate correct percentiles for even-sized dataset
+[info] IQRDetectorSpec:
+[info] - should not detect anomaly when value is within bounds
+[info] - should detect anomaly when value is above upper bound
+[info] - should calculate normalized anomaly score
+[info] ZScoreDetectorSpec:
+[info] - should detect anomaly when value exceeds positive threshold
+[info] - should calculate correct Z-score
+[info] IntegrationSpec:
+[info] - should detect anomalies consistently across methods
+[info] - should process realistic healthcare data pattern
+```
+
+#### Writing New Tests
+
+Follow ScalaTest conventions:
+
+```scala
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
+
+class MyNewSpec extends AnyFlatSpec with Matchers {
+  "MyClass" should "do something" in {
+    val result = MyClass.doSomething()
+    result shouldBe expectedValue
+  }
+}
+```
+
 ### Code Structure
 
 - **Model**: Data classes (`AnomalyResult`, `MetricStatistics`)
