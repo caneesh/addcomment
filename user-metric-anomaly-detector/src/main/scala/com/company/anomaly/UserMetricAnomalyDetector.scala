@@ -3,10 +3,11 @@ package com.company.anomaly
 import com.company.anomaly.config.AppConfig
 import com.company.anomaly.detector.{IQRDetector, ZScoreDetector}
 import com.company.anomaly.model.AnomalyResult
-import com.company.anomaly.service.{EmailService, MetricService}
+import com.company.anomaly.service.{ChartService, EmailService, MetricService}
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
+import java.io.File
 import java.sql.Date
 import java.time.LocalDate
 import scala.util.{Failure, Success, Try}
@@ -136,6 +137,7 @@ object UserMetricAnomalyDetector {
       // Initialize services
       metricService = MetricService(spark, config)
       emailService = EmailService(config)
+      chartService = ChartService()
 
       // Get actual count for target date
       actualCount <- metricService.getActualCount(targetDate)
@@ -176,12 +178,69 @@ object UserMetricAnomalyDetector {
       _ <- metricService.saveMetricStatistics(statistics)
       _ = logger.info(s"Saved statistics for day of week $dayOfWeek")
 
+      // Generate chart for last 10 days (if anomalies detected)
+      chartFile <- generateChartIfNeeded(metricService, chartService, targetDate, results)
+
       // Send email alert if any anomalies detected
-      _ <- handleAnomalyAlert(emailService, targetDate, actualCount, results)
+      _ <- handleAnomalyAlert(emailService, targetDate, actualCount, results, chartFile)
+
+      // Clean up chart file if it was created
+      _ = chartFile.foreach(file => chartService.deleteChart(file))
 
     } yield {
       logger.info("Anomaly detection pipeline completed successfully")
       printSummary(targetDate, actualCount, results)
+    }
+  }
+
+  /**
+   * Generate chart if anomalies are detected
+   *
+   * @param metricService Metric service instance
+   * @param chartService Chart service instance
+   * @param targetDate Target date
+   * @param results Detection results
+   * @return Optional file containing chart
+   */
+  private def generateChartIfNeeded(
+    metricService: MetricService,
+    chartService: ChartService,
+    targetDate: Date,
+    results: Seq[AnomalyResult]
+  ): Try[Option[File]] = {
+
+    val anomalies = results.filter(_.isAnomaly)
+
+    if (anomalies.isEmpty) {
+      logger.info("No anomalies detected, skipping chart generation")
+      Success(None)
+    } else {
+      logger.info("Generating chart for last 10 days")
+
+      for {
+        // Get last 10 days of data
+        dailyCounts <- metricService.getRecentDailyCounts(targetDate, numberOfDays = 10)
+        _ = logger.info(s"Retrieved ${dailyCounts.size} days of data for chart")
+
+        // Generate chart
+        chartPath = chartService.createTempChartPath(
+          prefix = s"anomaly-chart-$targetDate-",
+          suffix = ".png"
+        )
+        chartFile <- chartService.generateDailyCountsChart(
+          data = dailyCounts,
+          targetDate = targetDate,
+          outputPath = chartPath
+        )
+        _ = logger.info(s"Chart generated successfully: ${chartFile.getName}")
+
+      } yield Some(chartFile)
+    } match {
+      case success @ Success(_) => success
+      case Failure(ex) =>
+        logger.error("Failed to generate chart", ex)
+        logger.warn("Continuing without chart attachment")
+        Success(None) // Don't fail the job if chart generation fails
     }
   }
 
@@ -192,13 +251,15 @@ object UserMetricAnomalyDetector {
    * @param targetDate Target date
    * @param actualCount Actual user count
    * @param results Detection results
+   * @param chartFile Optional chart file to attach
    * @return Success or Failure
    */
   private def handleAnomalyAlert(
     emailService: EmailService,
     targetDate: Date,
     actualCount: Long,
-    results: Seq[AnomalyResult]
+    results: Seq[AnomalyResult],
+    chartFile: Option[File]
   ): Try[Unit] = {
 
     val anomalies = results.filter(_.isAnomaly)
@@ -210,7 +271,7 @@ object UserMetricAnomalyDetector {
       logger.warn(s"Anomalies detected by ${anomalies.length} method(s): " +
         s"${anomalies.map(_.detectionMethod).mkString(", ")}")
 
-      emailService.sendAnomalyAlert(targetDate, actualCount, results) match {
+      emailService.sendAnomalyAlert(targetDate, actualCount, results, chartFile) match {
         case Success(_) =>
           logger.info("Email alert sent successfully")
           Success(())

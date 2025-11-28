@@ -4,10 +4,12 @@ import com.company.anomaly.config.AppConfig
 import com.company.anomaly.model.AnomalyResult
 import org.slf4j.LoggerFactory
 
+import java.io.File
 import java.sql.Date
 import java.util.Properties
+import javax.activation.{DataHandler, FileDataSource}
 import javax.mail._
-import javax.mail.internet.{InternetAddress, MimeMessage}
+import javax.mail.internet.{InternetAddress, MimeBodyPart, MimeMessage, MimeMultipart}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -26,12 +28,14 @@ class EmailService(config: AppConfig) {
    * @param targetDate The date being analyzed
    * @param actualCount Actual user count
    * @param results All anomaly detection results
+   * @param chartFile Optional chart image file to attach
    * @return Success or Failure
    */
   def sendAnomalyAlert(
     targetDate: Date,
     actualCount: Long,
-    results: Seq[AnomalyResult]
+    results: Seq[AnomalyResult],
+    chartFile: Option[File] = None
   ): Try[Unit] = Try {
     logger.info(s"Preparing to send anomaly alert for $targetDate")
 
@@ -44,9 +48,9 @@ class EmailService(config: AppConfig) {
     }
 
     val subject = s"⚠️ User Metric Anomaly Detected - $targetDate"
-    val htmlBody = buildHtmlEmail(targetDate, actualCount, results)
+    val htmlBody = buildHtmlEmail(targetDate, actualCount, results, chartFile.isDefined)
 
-    sendEmail(subject, htmlBody)
+    sendEmail(subject, htmlBody, chartFile)
 
     logger.info(s"Anomaly alert email sent successfully to ${config.emailTo.mkString(", ")}")
   }
@@ -57,12 +61,14 @@ class EmailService(config: AppConfig) {
    * @param targetDate The date being analyzed
    * @param actualCount Actual user count
    * @param results All detection results
+   * @param hasChart Whether a chart attachment is included
    * @return HTML string
    */
   private def buildHtmlEmail(
     targetDate: Date,
     actualCount: Long,
-    results: Seq[AnomalyResult]
+    results: Seq[AnomalyResult],
+    hasChart: Boolean = false
   ): String = {
     val anomalies = results.filter(_.isAnomaly)
     val maxSeverity = if (anomalies.nonEmpty) anomalies.map(_.severity).maxBy(severityRank) else "NORMAL"
@@ -134,6 +140,13 @@ class EmailService(config: AppConfig) {
        |
        |      <h2>Detection Results</h2>
        |      $resultsHtml
+       |      ${if (hasChart) """
+       |      <div class="metric-box">
+       |        <h3>📊 Visual Trend</h3>
+       |        <p>A bar chart showing daily user counts for the last 10 days is attached to this email.</p>
+       |        <p>The chart provides visual context to help identify patterns and trends.</p>
+       |      </div>
+       |      """ else ""}
        |
        |      <div class="metric-box">
        |        <h3>📊 Action Required</h3>
@@ -168,9 +181,14 @@ class EmailService(config: AppConfig) {
    *
    * @param subject Email subject
    * @param htmlBody HTML email body
+   * @param attachmentFile Optional file to attach
    * @return Success or Failure
    */
-  private def sendEmail(subject: String, htmlBody: String): Try[Unit] = Try {
+  private def sendEmail(
+    subject: String,
+    htmlBody: String,
+    attachmentFile: Option[File] = None
+  ): Try[Unit] = Try {
     logger.info(s"Sending email to ${config.emailTo.mkString(", ")}")
 
     // Set up mail server properties
@@ -201,7 +219,35 @@ class EmailService(config: AppConfig) {
     }
 
     message.setSubject(subject)
-    message.setContent(htmlBody, "text/html; charset=utf-8")
+
+    // Create multipart message if attachment exists
+    attachmentFile match {
+      case Some(file) if file.exists() =>
+        logger.info(s"Adding attachment: ${file.getName}")
+
+        val multipart = new MimeMultipart()
+
+        // HTML body part
+        val htmlPart = new MimeBodyPart()
+        htmlPart.setContent(htmlBody, "text/html; charset=utf-8")
+        multipart.addBodyPart(htmlPart)
+
+        // Attachment part
+        val attachmentPart = new MimeBodyPart()
+        val source = new FileDataSource(file)
+        attachmentPart.setDataHandler(new DataHandler(source))
+        attachmentPart.setFileName(file.getName)
+        multipart.addBodyPart(attachmentPart)
+
+        message.setContent(multipart)
+
+      case Some(file) =>
+        logger.warn(s"Attachment file does not exist: ${file.getAbsolutePath}")
+        message.setContent(htmlBody, "text/html; charset=utf-8")
+
+      case None =>
+        message.setContent(htmlBody, "text/html; charset=utf-8")
+    }
 
     // Send message
     Transport.send(message)

@@ -28,7 +28,8 @@ The User Metric Anomaly Detector is a Spark-based application designed to monito
 - **Multiple Detection Algorithms**: IQR (Interquartile Range) and Z-Score methods
 - **Day-of-Week Awareness**: Compares metrics against same day-of-week historical data
 - **Configurable Lookback**: Supports 1-4 years of historical data for pattern analysis
-- **Automated Alerts**: HTML email notifications with detailed anomaly information
+- **Visual Analytics**: Auto-generated bar charts showing 10-day trend analysis
+- **Automated Alerts**: HTML email notifications with chart attachments
 - **Production-Ready**: Robust error handling, logging, and Hive integration
 
 ## Features
@@ -51,9 +52,18 @@ The User Metric Anomaly Detector is a Spark-based application designed to monito
 
 - HTML formatted emails with severity indicators
 - Color-coded severity levels (Low, Medium, High, Critical)
+- **Bar chart attachment** showing last 10 days of user counts
 - Detailed statistics for each detection method
 - Direct links to investigation dashboards
 - Support for multiple recipients
+
+### Visual Analytics
+
+- **Automatic Chart Generation**: Creates bar charts when anomalies are detected
+- **10-Day Trend View**: Shows context with last 10 days of user counts
+- **PNG Attachment**: Charts attached to email alerts for easy viewing
+- **Temporary File Management**: Auto-cleanup of generated chart files
+- **JFreeChart Integration**: High-quality chart rendering
 
 ### Data Persistence
 

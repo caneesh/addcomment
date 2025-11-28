@@ -86,6 +86,46 @@ class MetricService(spark: SparkSession, config: AppConfig) {
   }
 
   /**
+   * Get daily user counts for the last N days (for charting)
+   *
+   * @param targetDate The ending date (inclusive)
+   * @param numberOfDays Number of days to retrieve
+   * @return Map of Date to user count
+   */
+  def getRecentDailyCounts(targetDate: Date, numberOfDays: Int = 10): Try[Map[Date, Long]] = Try {
+    logger.info(s"Fetching last $numberOfDays days of data ending on $targetDate")
+
+    val startDate = Date.valueOf(targetDate.toLocalDate.minusDays(numberOfDays - 1))
+
+    val query = s"""
+      |SELECT
+      |  metric_date,
+      |  user_count
+      |FROM ${config.userMetricsTable}
+      |WHERE metric_date >= date('$startDate')
+      |  AND metric_date <= date('$targetDate')
+      |  AND user_count IS NOT NULL
+      |ORDER BY metric_date
+      |""".stripMargin
+
+    val results = spark.sql(query).collect()
+
+    if (results.isEmpty) {
+      logger.warn(s"No data found for date range $startDate to $targetDate")
+      Map.empty[Date, Long]
+    } else {
+      val dataMap = results.map { row =>
+        val date = row.getAs[Date]("metric_date")
+        val count = row.getAs[Long]("user_count")
+        date -> count
+      }.toMap
+
+      logger.info(s"Retrieved ${dataMap.size} days of data")
+      dataMap
+    }
+  }
+
+  /**
    * Calculate statistics for a specific day of week from historical data
    *
    * @param historicalData DataFrame with historical metrics

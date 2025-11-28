@@ -21,6 +21,9 @@ libraryDependencies ++= Seq(
   // Email functionality
   "javax.mail" % "mail" % "1.4.7",
 
+  // Chart generation
+  "org.jfree" % "jfreechart" % "1.5.4",
+
   // Logging
   "org.slf4j" % "slf4j-api" % "1.7.36",
   "org.slf4j" % "slf4j-log4j12" % "1.7.36" % "provided"
