@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/caneesh/addcomment#readme",
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.9.1",
     "@octokit/graphql": "^4.3.0",
     "jest-mock": "^24.9.0"
   },
